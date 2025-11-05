@@ -205,6 +205,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSubjectList();
 });
+// === Pengaturan Guru ===
+const teacherSettingsBtn = document.getElementById('teacher-settings-btn');
+
+// Modal sederhana (dibuat dinamis, tanpa ubah tampilan utama)
+const settingsModal = document.createElement('div');
+settingsModal.className = 'modal-backdrop';
+settingsModal.innerHTML = `
+  <div class="modal bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-4 text-center">Pengaturan Guru</h2>
+    <div class="space-y-3">
+      <input id="sheet-url-input" type="text" placeholder="URL Spreadsheet Google Sheet" class="w-full border rounded-lg px-3 py-2">
+      <input id="apps-script-url-input" type="text" placeholder="URL Apps Script (web app)" class="w-full border rounded-lg px-3 py-2">
+      <input id="api-key-input" type="text" placeholder="Gemini API Key (Opsional)" class="w-full border rounded-lg px-3 py-2">
+      <input id="pin-input" type="password" placeholder="PIN Guru" class="w-full border rounded-lg px-3 py-2">
+    </div>
+    <div class="flex justify-end gap-3 mt-5">
+      <button id="close-settings" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">Batal</button>
+      <button id="save-settings" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+    </div>
+  </div>
+`;
+document.body.appendChild(settingsModal);
+
+// Tampilkan modal jika PIN benar
+teacherSettingsBtn.addEventListener('click', () => {
+  settingsModal.style.display = 'flex';
+  settingsModal.querySelector('.modal').style.display = 'block';
+});
+
+// Tombol batal
+settingsModal.querySelector('#close-settings').addEventListener('click', () => {
+  settingsModal.style.display = 'none';
+});
+
+// Tombol simpan
+settingsModal.querySelector('#save-settings').addEventListener('click', () => {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (pin !== TEACHER_PIN) {
+    alert('PIN Guru salah!');
+    return;
+  }
+  settings.sheetUrl = document.getElementById('sheet-url-input').value.trim();
+  settings.appsScriptUrl = document.getElementById('apps-script-url-input').value.trim();
+  settings.geminiApiKey = document.getElementById('api-key-input').value.trim();
+  localStorage.setItem('settings', JSON.stringify(settings));
+  alert('Pengaturan disimpan!');
+  settingsModal.style.display = 'none';
+  loadSubjectList(); // refresh daftar mapel & materi setelah simpan
+});
+
+// Saat halaman dimuat, ambil pengaturan tersimpan
+const savedSettings = localStorage.getItem('settings');
+if (savedSettings) {
+  settings = JSON.parse(savedSettings);
+}
+
 </script>
 </body>
 </html>
+
