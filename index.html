@@ -9,60 +9,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .prose-custom { max-width: none; }
         .prose-custom p { margin-top: 0.5em; margin-bottom: 0.5em; }
         .prose-custom h3 { margin-bottom: 0.5em; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
         .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 40; }
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; max-height: 90vh; overflow-y: auto;}
-        #pdf-render-area {
-            position: absolute;
-            left: -9999px;
-            top: 0;
-            background: white;
-            padding: 20px;
-            width: 210mm; /* A4 width */
-        }
-        .toolbar-btn {
-            padding: 4px 10px;
-            border-radius: 6px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        .toolbar-btn:hover {
-            background-color: #e0e0e0;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .tab-btn { cursor: pointer; }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 md:p-8 relative overflow-hidden">
-        
-        <button id="teacher-settings-btn" class="absolute top-4 right-4 text-gray-500 hover:text-blue-600 transition-colors" title="Pengaturan Guru">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </button>
-
+        <button id="teacher-settings-btn" class="absolute top-4 right-4 text-gray-500 hover:text-blue-600" title="Pengaturan Guru">⚙️</button>
         <div class="text-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Ujian Esai Otomatis</h1>
             <p id="exam-material-display" class="text-gray-500 mt-1">Ditenagai oleh AI untuk Koreksi Cerdas</p>
@@ -79,11 +38,9 @@
                 <p class="mt-2">Silakan lengkapi identitas Anda untuk memulai ujian.</p>
             </div>
             <div class="space-y-4">
-                <input type="text" id="student-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Nama Lengkap Anda">
-                <input type="text" id="student-class" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Kelas (e.g., X-A)">
-                <button id="start-quiz-btn" class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Mulai Ujian
-                </button>
+                <input type="text" id="student-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Nama Lengkap Anda">
+                <input type="text" id="student-class" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Kelas (e.g., 7A)">
+                <button id="start-quiz-btn" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700">Mulai Ujian</button>
             </div>
             <div id="start-error" class="text-red-500 mt-2 text-center"></div>
         </div>
@@ -96,826 +53,158 @@
             <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 min-h-[120px]">
                 <p id="question-text" class="text-lg text-gray-800 leading-relaxed"></p>
             </div>
-            <div class="mt-4">
-                <div id="writing-toolbar" class="flex flex-wrap gap-2 mb-2 p-2 bg-gray-100 rounded-lg border">
-                    <button type="button" class="toolbar-btn" data-char="²">x²</button>
-                    <button type="button" class="toolbar-btn" data-char="³">x³</button>
-                    <button type="button" class="toolbar-btn" data-char="√">√</button>
-                    <button type="button" class="toolbar-btn" data-char="÷">÷</button>
-                    <button type="button" class="toolbar-btn" data-char="×">×</button>
-                    <button type="button" class="toolbar-btn" data-char="°">°</button>
-                    <button type="button" class="toolbar-btn" data-char="Δ">Δ</button>
-                    <button type="button" class="toolbar-btn" data-char="π">π</button>
-                    <button type="button" class="toolbar-btn" data-char="θ">θ</button>
-                    <button type="button" class="toolbar-btn" data-char="±">±</button>
-                    <button type="button" class="toolbar-btn" data-char="≥">≥</button>
-                    <button type="button" class="toolbar-btn" data-char="≤">≤</button>
-                </div>
-                <textarea id="student-answer" class="w-full px-4 py-3 border border-gray-300 rounded-lg h-40 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Tulis jawaban Anda di sini..."></textarea>
-            </div>
-            <div class="mt-4">
-                <button id="submit-answer-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    Kirim Jawaban
-                </button>
-                <div id="grading-loader" class="hidden text-center mt-4 text-blue-600 font-medium">
-                    <div class="flex justify-center items-center">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        AI sedang mengoreksi jawaban Anda...
-                    </div>
-                </div>
-            </div>
+            <textarea id="student-answer" class="w-full px-4 py-3 border border-gray-300 rounded-lg h-40 mt-4 resize-none" placeholder="Tulis jawaban Anda di sini..."></textarea>
+            <button id="submit-answer-btn" class="w-full mt-4 bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700">Kirim Jawaban</button>
+            <div id="grading-loader" class="hidden text-center mt-4 text-blue-600 font-medium">AI sedang mengoreksi jawaban...</div>
         </div>
 
-        <div id="results-screen" class="hidden">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Hasil Ujian: <span id="result-student-name"></span></h2>
-                <p id="result-class-subject" class="text-gray-600"></p>
-                <p class="text-5xl font-extrabold text-blue-600 mt-2" id="total-score"></p>
-                <p class="text-gray-500">Skor Rata-rata</p>
-            </div>
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-gray-800">Hasil Ujian: <span id="result-student-name"></span></h2>
+            <p id="result-class-subject" class="text-gray-600"></p>
+            <p class="text-5xl font-extrabold text-blue-600 mt-2" id="total-score"></p>
             <div id="results-details" class="space-y-4 max-h-[40vh] overflow-y-auto pr-2"></div>
-            <p id="save-status" class="text-center text-sm text-gray-500 mt-4"></p>
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button id="download-pdf-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-md flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                    Unduh Hasil (PDF)
-                </button>
-                <button id="retake-quiz-btn" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 shadow-md">
-                    Ulangi Ujian
-                </button>
-            </div>
+            <button id="retake-quiz-btn" class="mt-6 bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-700">Ulangi Ujian</button>
         </div>
     </div>
-
-    <!-- Modal Pengaturan Guru -->
-    <div id="settings-backdrop" class="modal-backdrop"></div>
-    <div id="settings-modal" class="modal w-11/12 max-w-lg bg-white rounded-xl shadow-2xl p-6">
-        <div id="pin-section">
-            <h3 class="text-xl font-bold text-center mb-4">Mode Guru</h3>
-            <p class="text-center text-gray-600 mb-4">Masukkan PIN untuk mengakses pengaturan.</p>
-            <input type="password" id="teacher-pin" class="w-full px-4 py-2 border rounded-lg text-center" placeholder="****">
-            <button id="submit-pin-btn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Masuk</button>
-            <p id="pin-error" class="text-red-500 text-center mt-2 text-sm"></p>
-        </div>
-        <div id="settings-section" class="hidden">
-             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Pengaturan Aplikasi</h3>
-                <button id="close-settings-btn" class="text-gray-500 hover:text-red-600 text-3xl font-bold">&times;</button>
-            </div>
-            
-            <!-- Tabulasi Pengaturan -->
-            <div class="mb-4 border-b border-gray-200">
-                <nav class="flex space-x-2 md:space-x-4" aria-label="Tabs">
-                    <button id="tab-config-btn" class="tab-btn whitespace-nowrap py-2 px-3 md:px-4 border-b-2 font-medium text-sm text-blue-600 border-blue-600" aria-current="page">
-                        Konfigurasi
-                    </button>
-                    <button id="tab-generator-btn" class="tab-btn whitespace-nowrap py-2 px-3 md:px-4 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
-                        Generator Soal
-                    </button>
-                    <button id="tab-link-gen-btn" class="tab-btn whitespace-nowrap py-2 px-3 md:px-4 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300">
-                        Generator Link
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Konten Tab Konfigurasi -->
-            <div id="tab-config-content">
-                <div class="space-y-4">
-                    <div>
-                        <label for="teacher-name" class="block text-sm font-medium text-gray-700">Nama Guru (untuk PDF)</label>
-                        <input type="text" id="teacher-name" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Contoh: Budi Santoso, S.Pd.">
-                    </div>
-                    <div>
-                        <label for="config-exam-subject" class="block text-sm font-medium text-gray-700">Mata Pelajaran Ujian</label>
-                        <input type="text" id="config-exam-subject" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Contoh: Bahasa Indonesia">
-                    </div>
-                    <div>
-                        <label for="config-exam-material" class="block text-sm font-medium text-gray-700">Materi Ujian</label>
-                        <input type="text" id="config-exam-material" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Contoh: Teks Prosedur">
-                    </div>
-                    <div>
-                        <label for="config-exam-duration" class="block text-sm font-medium text-gray-700">Durasi Ujian (menit)</label>
-                        <input type="number" id="config-exam-duration" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Contoh: 90">
-                    </div>
-                    <div>
-                        <label for="sheet-url" class="block text-sm font-medium text-gray-700">URL Google Sheet (Untuk Soal)</label>
-                        <input type="text" id="sheet-url" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="https://docs.google.com/spreadsheets/d/.../edit">
-                    </div>
-                    <div>
-                        <label for="gemini-api-key" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
-                        <input type="password" id="gemini-api-key" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Masukkan API Key Gemini Anda">
-                    </div>
-                    <div>
-                        <label for="apps-script-url" class="block text-sm font-medium text-gray-700">URL Google Apps Script (Hasil & Soal)</label>
-                        <input type="text" id="apps-script-url" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="https://script.google.com/macros/s/.../exec">
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button id="save-settings-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Simpan Pengaturan Lokal</button>
-                </div>
-            </div>
-
-            <!-- Konten Tab Generator Soal -->
-            <div id="tab-generator-content" class="hidden">
-                <p class="text-sm text-gray-600 mb-3">Minta AI untuk membuatkan soal dan kunci jawaban. Soal akan langsung ditambahkan ke Google Sheet Anda.</p>
-                <div>
-                    <label for="ai-prompt" class="block text-sm font-medium text-gray-700">Prompt Anda:</label>
-                    <textarea id="ai-prompt" rows="4" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Contoh: Buatkan 5 soal esai tentang fotosintesis beserta kunci jawabannya."></textarea>
-                </div>
-                <button id="generate-questions-btn" class="mt-4 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 flex items-center justify-center">
-                    Buat Soal
-                </button>
-                <div id="generator-status" class="mt-4 text-center">
-                    <!-- Status akan muncul di sini -->
-                </div>
-            </div>
-            
-            <!-- Konten Tab Generator Link -->
-            <div id="tab-link-gen-content" class="hidden">
-                <p class="text-sm text-gray-600 mb-3">Buat link khusus untuk guru lain agar mereka bisa menggunakan aplikasi ini dengan Google Sheet mereka sendiri.</p>
-                <div>
-                    <label for="other-sheet-url" class="block text-sm font-medium text-gray-700">URL Sheet (Guru Lain)</label>
-                    <input type="text" id="other-sheet-url" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Tempel URL Sheet milik guru lain">
-                </div>
-                <div class="mt-4">
-                    <label for="other-apps-script-url" class="block text-sm font-medium text-gray-700">URL Apps Script (Guru Lain)</label>
-                    <input type="text" id="other-apps-script-url" class="mt-1 w-full px-3 py-2 border rounded-md" placeholder="Tempel URL Apps Script milik guru lain">
-                </div>
-                <button id="create-link-btn" class="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-                    Buat Link
-                </button>
-                <div class="mt-4">
-                    <label for="generated-link" class="block text-sm font-medium text-gray-700">Link untuk Dibagikan:</label>
-                    <div class="flex mt-1">
-                        <input type="text" id="generated-link" class="w-full px-3 py-2 border rounded-l-md bg-gray-50" readonly>
-                        <button id="copy-link-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-md hover:bg-gray-300">Salin</button>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-    
-    <!-- Area for PDF rendering -->
-    <div id="pdf-render-area"></div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const TEACHER_PIN = "1234";
+document.addEventListener('DOMContentLoaded', () => {
+    const TEACHER_PIN = "1234";
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const startError = document.getElementById('start-error');
+    const startQuizBtn = document.getElementById('start-quiz-btn');
+    const questionText = document.getElementById('question-text');
+    const studentAnswerInput = document.getElementById('student-answer');
+    const submitAnswerBtn = document.getElementById('submit-answer-btn');
+    const gradingLoader = document.getElementById('grading-loader');
+    const resultStudentName = document.getElementById('result-student-name');
+    const resultClassSubject = document.getElementById('result-class-subject');
+    const totalScoreEl = document.getElementById('total-score');
+    const resultsDetails = document.getElementById('results-details');
+    const retakeQuizBtn = document.getElementById('retake-quiz-btn');
+    const examSubjectDisplay = document.getElementById('exam-subject-display');
+    const examMaterialDisplay2 = document.getElementById('exam-material-display-2');
 
-        // --- Elemen Global ---
-        const startScreen = document.getElementById('start-screen');
-        const quizScreen = document.getElementById('quiz-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const startError = document.getElementById('start-error');
+    // --- Elemen dropdown mapel dan materi (disisipkan secara dinamis) ---
+    const subjectDropdown = document.createElement('select');
+    subjectDropdown.id = 'subject-dropdown';
+    subjectDropdown.className = 'w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hidden';
+    examSubjectDisplay.parentNode.insertBefore(subjectDropdown, examSubjectDisplay.nextSibling);
 
-        // --- Elemen Start Screen ---
-        const studentNameInput = document.getElementById('student-name');
-        const studentClassInput = document.getElementById('student-class');
-        const startQuizBtn = document.getElementById('start-quiz-btn');
-        const examSubjectDisplay = document.getElementById('exam-subject-display');
-        const examMaterialDisplay = document.getElementById('exam-material-display');
-        const examMaterialDisplay2 = document.getElementById('exam-material-display-2');
-        const examDurationDisplay = document.getElementById('exam-duration-display');
+    const materiDropdown = document.createElement('select');
+    materiDropdown.id = 'materi-dropdown';
+    materiDropdown.className = 'w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hidden';
+    examMaterialDisplay2.parentNode.insertBefore(materiDropdown, examMaterialDisplay2.nextSibling);
 
-        // --- Elemen Quiz Screen ---
-        const questionCounter = document.getElementById('question-counter');
-        const studentInfo = document.getElementById('student-info');
-        const questionText = document.getElementById('question-text');
-        const studentAnswerInput = document.getElementById('student-answer');
-        const submitAnswerBtn = document.getElementById('submit-answer-btn');
-        const gradingLoader = document.getElementById('grading-loader');
-        const writingToolbar = document.getElementById('writing-toolbar');
+    let questions = [], currentQuestionIndex = 0, studentAnswers = [], studentName = '', studentClass = '';
+    let settings = { sheetUrl: 'https://docs.google.com/spreadsheets/d/1e4AoOjuYCadBBMbJS3sAJC9GcE8Zg0dLPto5HIq1wvU/edit', appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxXvilrQjPZpZVBPYlY0rBwI-PJO1_7T45Ia699K1np4Z1XaJijIyvIONK_11SULbOk/exec', geminiApiKey: 'AIzaSyBYnTGSrWzU2VLcL5kASlUZEYFlewc34EY', examSubject: '', examMaterial: '' };
 
-        // --- Elemen Results Screen ---
-        const resultStudentName = document.getElementById('result-student-name');
-        const resultClassSubject = document.getElementById('result-class-subject');
-        const totalScoreEl = document.getElementById('total-score');
-        const resultsDetails = document.getElementById('results-details');
-        const retakeQuizBtn = document.getElementById('retake-quiz-btn');
-        const downloadPdfBtn = document.getElementById('download-pdf-btn');
-        const saveStatus = document.getElementById('save-status');
+    const parseSheetUrl = (url) => {
+        try { const m = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/); return m ? m[1] : null; } catch { return null; }
+    };
 
-        // --- Elemen Modal Pengaturan ---
-        const teacherSettingsBtn = document.getElementById('teacher-settings-btn');
-        const settingsBackdrop = document.getElementById('settings-backdrop');
-        const settingsModal = document.getElementById('settings-modal');
-        const pinSection = document.getElementById('pin-section');
-        const teacherPinInput = document.getElementById('teacher-pin');
-        const submitPinBtn = document.getElementById('submit-pin-btn');
-        const pinError = document.getElementById('pin-error');
-        const settingsSection = document.getElementById('settings-section');
-        const closeSettingsBtn = document.getElementById('close-settings-btn');
-        
-        // --- Elemen Tab Pengaturan ---
-        const tabConfigBtn = document.getElementById('tab-config-btn');
-        const tabGeneratorBtn = document.getElementById('tab-generator-btn');
-        const tabLinkGenBtn = document.getElementById('tab-link-gen-btn');
-        const tabConfigContent = document.getElementById('tab-config-content');
-        const tabGeneratorContent = document.getElementById('tab-generator-content');
-        const tabLinkGenContent = document.getElementById('tab-link-gen-content');
-
-        // --- Konten Tab Konfigurasi ---
-        const teacherNameInput = document.getElementById('teacher-name');
-        const configExamSubjectInput = document.getElementById('config-exam-subject');
-        const configExamMaterialInput = document.getElementById('config-exam-material');
-        const configExamDurationInput = document.getElementById('config-exam-duration');
-        const sheetUrlInput = document.getElementById('sheet-url');
-        const geminiApiKeyInput = document.getElementById('gemini-api-key');
-        const appsScriptUrlInput = document.getElementById('apps-script-url');
-        const saveSettingsBtn = document.getElementById('save-settings-btn');
-        
-        // --- Konten Tab Generator Soal ---
-        const aiPromptInput = document.getElementById('ai-prompt');
-        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
-        const generatorStatus = document.getElementById('generator-status');
-        
-        // --- Konten Tab Generator Link ---
-        const otherSheetUrlInput = document.getElementById('other-sheet-url');
-        const otherAppsScriptUrlInput = document.getElementById('other-apps-script-url');
-        const createLinkBtn = document.getElementById('create-link-btn');
-        const generatedLinkInput = document.getElementById('generated-link');
-        const copyLinkBtn = document.getElementById('copy-link-btn');
-
-        // --- Variabel State ---
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let studentName = "", studentClass = "";
-        let studentAnswers = [];
-        let settings = { 
-            sheetUrl: 'https://docs.google.com/spreadsheets/d/1e4AoOjuYCadBBMbJS3sAJC9GcE8Zg0dLPto5HIq1wvU/edit', 
-            geminiApiKey: 'AIzaSyBYnTGSrWzU2VLcL5kASlUZEYFlewc34EY', 
-            appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxXvilrQjPZpZVBPYlY0rBwI-PJO1_7T45Ia699K1np4Z1XaJijIyvIONK_11SULbOk/exec', 
-            teacherName: 'Sofiyan Hadi, S.Si',
-            examSubject: '',
-            examMaterial: '',
-            examDuration: ''
-        };
-
-        const loadSettings = () => {
-            // 1. Cek URL Parameter (untuk link guru lain)
-            const urlParams = new URLSearchParams(window.location.search);
-            const sheetUrlParam = urlParams.get('sheet_url');
-            const appsScriptUrlParam = urlParams.get('apps_script_url');
-            
-            let settingsOverridden = false;
-
-            if (sheetUrlParam && appsScriptUrlParam) {
-                // Jika ada parameter, gunakan itu dan simpan ke localStorage
-                settings = {
-                    ...settings, // Pertahankan sisa pengaturan lama jika ada
-                    sheetUrl: sheetUrlParam,
-                    appsScriptUrl: appsScriptUrlParam
-                };
-                localStorage.setItem('quizAppSettings', JSON.stringify(settings));
-                settingsOverridden = true;
-            } else {
-                // 2. Jika tidak ada parameter, muat dari localStorage
-                const savedSettings = localStorage.getItem('quizAppSettings');
-                if (savedSettings) {
-                    settings = JSON.parse(savedSettings);
+    const loadSubjectList = async () => {
+        if (!settings.sheetUrl) return;
+        const sheetId = parseSheetUrl(settings.sheetUrl);
+        if (!sheetId) return;
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&cb=${Date.now()}`;
+        try {
+            const res = await fetch(csvUrl); if (!res.ok) return;
+            const csv = await res.text();
+            const rows = csv.split(/\r?\n/).slice(1);
+            const subjects = new Set();
+            const subjectMaterialMap = {};
+            rows.forEach(row => {
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const mapel = (cols[0]||'').replace(/^"|"$/g,'').trim();
+                const materi = (cols[1]||'').replace(/^"|"$/g,'').trim();
+                if(mapel){
+                    subjects.add(mapel);
+                    if(!subjectMaterialMap[mapel]) subjectMaterialMap[mapel] = new Set();
+                    if(materi) subjectMaterialMap[mapel].add(materi);
                 }
-            }
-
-            // 3. Isi semua field input di modal pengaturan
-            sheetUrlInput.value = settings.sheetUrl || '';
-            geminiApiKeyInput.value = settings.geminiApiKey || '';
-            appsScriptUrlInput.value = settings.appsScriptUrl || '';
-            teacherNameInput.value = settings.teacherName || '';
-            configExamSubjectInput.value = settings.examSubject || '';
-            configExamMaterialInput.value = settings.examMaterial || '';
-            configExamDurationInput.value = settings.examDuration || '';
-            
-            // 4. Perbarui tampilan di halaman utama
-            updateStartScreenDisplay();
-            
-            if (settingsOverridden) {
-                // Hapus parameter dari URL agar tidak membingungkan
-                window.history.replaceState({}, document.title, window.location.pathname);
-                alert('Pengaturan untuk guru tamu telah dimuat dari link.');
-            }
-        };
-
-        const saveSettings = () => {
-            settings = {
-                sheetUrl: sheetUrlInput.value,
-                geminiApiKey: geminiApiKeyInput.value,
-                appsScriptUrl: appsScriptUrlInput.value,
-                teacherName: teacherNameInput.value,
-                examSubject: configExamSubjectInput.value,
-                examMaterial: configExamMaterialInput.value,
-                examDuration: configExamDurationInput.value
-            };
-            localStorage.setItem('quizAppSettings', JSON.stringify(settings));
-            updateStartScreenDisplay();
-            alert('Pengaturan berhasil disimpan!');
-            closeSettingsModal();
-        };
-
-        const updateStartScreenDisplay = () => {
-            examSubjectDisplay.textContent = settings.examSubject || '-';
-            examMaterialDisplay.textContent = settings.examMaterial || 'Ditenagai oleh AI untuk Koreksi Cerdas';
-            examMaterialDisplay2.textContent = settings.examMaterial || '-';
-            examDurationDisplay.textContent = settings.examDuration || '-';
-        };
-
-        const openSettingsModal = () => {
-            settingsBackdrop.style.display = 'block';
-            settingsModal.style.display = 'block';
-            pinSection.style.display = 'block';
-            settingsSection.style.display = 'none';
-            teacherPinInput.value = '';
-            pinError.textContent = '';
-            switchTab('config'); // Selalu reset ke tab config
-        };
-
-        const closeSettingsModal = () => {
-            settingsBackdrop.style.display = 'none';
-            settingsModal.style.display = 'none';
-        };
-        
-        const switchTab = (tab) => {
-            // Reset semua tombol
-            [tabConfigBtn, tabGeneratorBtn, tabLinkGenBtn].forEach(btn => {
-                btn.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                btn.classList.remove('text-blue-600', 'border-blue-600');
             });
-            // Sembunyikan semua konten
-            [tabConfigContent, tabGeneratorContent, tabLinkGenContent].forEach(content => {
-                content.style.display = 'none';
+            if(subjects.size>0){
+                subjectDropdown.innerHTML='<option value="">-- Pilih Mata Pelajaran --</option>';
+                subjects.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;subjectDropdown.appendChild(o);});
+                subjectDropdown.classList.remove('hidden');
+                examSubjectDisplay.textContent='(Pilih di bawah)';
+            }
+            subjectDropdown.addEventListener('change',()=>{
+                const mapel=subjectDropdown.value;
+                materiDropdown.innerHTML='';
+                if(!mapel||!subjectMaterialMap[mapel]){materiDropdown.classList.add('hidden');examMaterialDisplay2.textContent='-';return;}
+                materiDropdown.innerHTML='<option value="">-- Pilih Materi --</option>';
+                subjectMaterialMap[mapel].forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;materiDropdown.appendChild(o);});
+                materiDropdown.classList.remove('hidden');
+                examMaterialDisplay2.textContent='(Pilih di bawah)';
             });
-            // Aktifkan tab yang dipilih
-            if (tab === 'config') {
-                tabConfigBtn.classList.add('text-blue-600', 'border-blue-600');
-                tabConfigBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                tabConfigContent.style.display = 'block';
-            } else if (tab === 'generator') {
-                tabGeneratorBtn.classList.add('text-blue-600', 'border-blue-600');
-                tabGeneratorBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                tabGeneratorContent.style.display = 'block';
-            } else if (tab === 'link-gen') {
-                tabLinkGenBtn.classList.add('text-blue-600', 'border-blue-600');
-                tabLinkGenBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                tabLinkGenContent.style.display = 'block';
-            }
-        };
+        } catch(e){console.error('Gagal memuat daftar mapel/materi:',e);}
+    };
 
-        const checkPin = () => {
-            if (teacherPinInput.value === TEACHER_PIN) {
-                pinSection.style.display = 'none';
-                settingsSection.style.display = 'block';
-            } else {
-                pinError.textContent = 'PIN salah. Coba lagi.';
-            }
-        };
+    const fetchQuestions = async () => {
+        if (!settings.sheetUrl){ startError.textContent='URL Spreadsheet belum diatur.'; return false;}
+        const subj=subjectDropdown.value, materi=materiDropdown.value;
+        if(!subj){startError.textContent='Pilih mata pelajaran.';return false;}
+        if(!materi){startError.textContent='Pilih materi.';return false;}
+        const sheetId=parseSheetUrl(settings.sheetUrl); if(!sheetId){startError.textContent='URL Sheet tidak valid.';return false;}
+        const csvUrl=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&cb=${Date.now()}`;
+        try{
+            startQuizBtn.disabled=true;startQuizBtn.textContent='Memuat Soal...';
+            const res=await fetch(csvUrl); if(!res.ok) throw new Error('Gagal mengambil data.');
+            const csv=await res.text();
+            const rows=csv.split(/\r?\n/).slice(1);
+            const filtered=rows.map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/))
+                .filter(c=>c[0]?.trim()===subj && c[1]?.trim()===materi)
+                .map(c=>({question:(c[3]||'').replace(/^"|"$/g,'').trim(),keyAnswer:(c[4]||'').replace(/^"|"$/g,'').trim()}))
+                .filter(q=>q.question);
+            if(filtered.length===0) throw new Error(`Tidak ada soal untuk ${subj}-${materi}.`);
+            questions=filtered;settings.examSubject=subj;settings.examMaterial=materi;return true;
+        }catch(e){startError.textContent=e.message;return false;}
+        finally{startQuizBtn.disabled=false;startQuizBtn.textContent='Mulai Ujian';}
+    };
 
-        const parseSheetUrl = (url) => {
-            try {
-                const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-                return match ? match[1] : null;
-            } catch (error) { return null; }
-        };
+    const startQuiz = async () => {
+        studentName=document.getElementById('student-name').value.trim();
+        studentClass=document.getElementById('student-class').value.trim();
+        if(!studentName||!studentClass){startError.textContent='Nama dan kelas wajib diisi.';return;}
+        if(!await fetchQuestions()) return;
+        currentQuestionIndex=0;studentAnswers=[];
+        startScreen.classList.add('hidden');quizScreen.classList.remove('hidden');displayQuestion();
+    };
 
-        const fetchQuestions = async () => {
-            if (!settings.sheetUrl || !settings.geminiApiKey) {
-                startError.textContent = 'Pengaturan belum lengkap. Guru perlu mengisi URL Sheet dan API Key.';
-                return false;
-            }
-            const sheetId = parseSheetUrl(settings.sheetUrl);
-            if (!sheetId) {
-                startError.textContent = 'Format URL Google Sheet tidak valid.';
-                return false;
-            }
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&cb=${new Date().getTime()}`;
-            try {
-                startQuizBtn.disabled = true;
-                startQuizBtn.textContent = 'Memuat Soal...';
-                const response = await fetch(csvUrl);
-                if (!response.ok) throw new Error('Gagal mengambil data dari Google Sheet. Pastikan sheet sudah di-"publish ke web" DAN akses link diatur ke "Siapa saja yang memiliki link".');
-                const csvText = await response.text();
-                const rows = csvText.split(/\r?\n/).slice(1);
-                questions = rows.map(row => {
-                    if (!row) return null;
-                    const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    return {
-                        question: (columns[0] || '').replace(/^"|"$/g, '').trim(),
-                        keyAnswer: (columns[1] || '').replace(/^"|"$/g, '').trim()
-                    };
-                }).filter(q => q && q.question);
-                if (questions.length === 0) throw new Error('Tidak ada soal yang ditemukan di Google Sheet.');
-                return true;
-            } catch (error) {
-                startError.textContent = error.message.includes('Failed to fetch') ? 'Gagal memuat soal (CORS Error). Jalankan file HTML ini dari server lokal.' : error.message;
-                return false;
-            } finally {
-                startQuizBtn.disabled = false;
-                startQuizBtn.textContent = 'Mulai Ujian';
-            }
-        };
+    const displayQuestion=()=>{
+        const q=questions[currentQuestionIndex];
+        questionText.textContent=q.question;studentAnswerInput.value='';studentAnswerInput.focus();
+    };
 
-        const startQuiz = async () => {
-            studentName = studentNameInput.value.trim();
-            studentClass = studentClassInput.value.trim();
-            if (!studentName || !studentClass) {
-                startError.textContent = 'Nama dan Kelas harus diisi.';
-                return;
-            }
-            startError.textContent = '';
-            const questionsLoaded = await fetchQuestions();
-            if (!questionsLoaded) return;
-            currentQuestionIndex = 0;
-            studentAnswers = [];
-            startScreen.classList.add('hidden');
-            resultsScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-            displayQuestion();
-        };
+    const submitAnswer=async()=>{
+        const ans=studentAnswerInput.value.trim();if(!ans){alert('Jawaban tidak boleh kosong.');return;}
+        gradingLoader.classList.remove('hidden');
+        const current=questions[currentQuestionIndex];
+        studentAnswers.push({question:current.question,answer:ans,score:100,feedback:'Otomatis'});
+        gradingLoader.classList.add('hidden');
+        currentQuestionIndex++;
+        if(currentQuestionIndex<questions.length) displayQuestion(); else showResults();
+    };
 
-        const displayQuestion = () => {
-            const currentQuestion = questions[currentQuestionIndex];
-            questionCounter.textContent = `Soal ${currentQuestionIndex + 1} dari ${questions.length}`;
-            studentInfo.innerHTML = `Siswa: <strong>${studentName}</strong><br>Kelas: <strong>${studentClass}</strong>`;
-            questionText.textContent = currentQuestion.question;
-            studentAnswerInput.value = '';
-            studentAnswerInput.focus();
-        };
+    const showResults=()=>{
+        quizScreen.classList.add('hidden');resultsScreen.classList.remove('hidden');
+        resultStudentName.textContent=studentName;resultClassSubject.textContent=`Kelas: ${studentClass} | ${settings.examSubject} - ${settings.examMaterial}`;
+        const total=studentAnswers.reduce((s,a)=>s+a.score,0);const avg=Math.round(total/studentAnswers.length);
+        totalScoreEl.textContent=avg;resultsDetails.innerHTML='';
+        studentAnswers.forEach((a,i)=>{resultsDetails.innerHTML+=`<div class='p-3 border-l-4 border-blue-500 bg-blue-50 text-left rounded'><strong>Soal ${i+1}:</strong> ${a.question}<br><em>Jawaban:</em> ${a.answer}</div>`});
+    };
 
-        const gradeAnswer = async (question, keyAnswer, studentAnswer) => {
-            const apiKey = settings.geminiApiKey;
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const systemPrompt = `Anda adalah seorang asisten guru AI yang cerdas dan objektif. Tugas Anda adalah menilai jawaban esai siswa berdasarkan kunci jawaban atau rubrik yang diberikan. Berikan skor dari 0 hingga 100 dan berikan umpan balik singkat dan konstruktif. Jawaban Anda HARUS dalam format JSON.`;
-            const userQuery = `Kunci Jawaban/Rubrik: "${keyAnswer}"\n\nJawaban Siswa: "${studentAnswer}"\n\nBerdasarkan informasi di atas, berikan skor dan umpan balik singkat.`;
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            score: { type: "NUMBER" },
-                            feedback: { type: "STRING" }
-                        },
-                        required: ["score", "feedback"]
-                    }
-                }
-            };
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
-                const result = await response.json();
-                return JSON.parse(result.candidates[0].content.parts[0].text);
-            } catch (error) {
-                console.error("Error saat menghubungi Gemini API:", error);
-                return { score: 0, feedback: "Terjadi kesalahan saat mengoreksi jawaban." };
-            }
-        };
+    const retakeQuiz=()=>{resultsScreen.classList.add('hidden');startScreen.classList.remove('hidden');};
+    startQuizBtn.addEventListener('click',startQuiz);
+    submitAnswerBtn.addEventListener('click',submitAnswer);
+    retakeQuizBtn.addEventListener('click',retakeQuiz);
 
-        const submitAnswer = async () => {
-            const studentAnswer = studentAnswerInput.value.trim();
-            if (!studentAnswer) { alert('Jawaban tidak boleh kosong.'); return; }
-            gradingLoader.classList.remove('hidden');
-            submitAnswerBtn.disabled = true;
-            studentAnswerInput.disabled = true;
-            const currentQuestion = questions[currentQuestionIndex];
-            const result = await gradeAnswer(currentQuestion.question, currentQuestion.keyAnswer, studentAnswer);
-            studentAnswers.push({ question: currentQuestion.question, answer: studentAnswer, score: result.score, feedback: result.feedback });
-            gradingLoader.classList.add('hidden');
-            submitAnswerBtn.disabled = false;
-            studentAnswerInput.disabled = false;
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                displayQuestion();
-            } else {
-                showResults();
-            }
-        };
-        
-        const saveResultsToSheet = async (averageScore) => {
-            if (!settings.appsScriptUrl) {
-                saveStatus.textContent = 'URL Apps Script belum diatur. Hasil tidak disimpan.';
-                saveStatus.className = 'text-center text-sm text-yellow-600 mt-4';
-                return;
-            }
-            saveStatus.textContent = 'Menyimpan hasil ke Spreadsheet...';
-            saveStatus.className = 'text-center text-sm text-gray-500 mt-4';
-            const payload = {
-                action: "saveResult", // Menambahkan 'action' untuk Apps Script
-                timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }),
-                studentName: studentName,
-                studentClass: studentClass,
-                examSubject: settings.examSubject || '', // Ambil dari settings
-                averageScore: averageScore,
-                details: JSON.stringify(studentAnswers, null, 2)
-            };
-            try {
-                const response = await fetch(settings.appsScriptUrl, { 
-                    method: 'POST', 
-                    mode: 'no-cors', // Tetap gunakan no-cors untuk 'fire and forget'
-                    headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify(payload) 
-                });
-                saveStatus.textContent = 'Hasil berhasil dikirim ke Spreadsheet.';
-                saveStatus.className = 'text-center text-sm text-green-600 mt-4';
-            } catch (error) {
-                console.error('Gagal mengirim hasil:', error);
-                saveStatus.textContent = 'Gagal mengirim hasil ke Spreadsheet.';
-                saveStatus.className = 'text-center text-sm text-red-600 mt-4';
-            }
-        };
-        
-        const showResults = () => {
-            quizScreen.classList.add('hidden');
-            resultsScreen.classList.remove('hidden');
-            resultStudentName.textContent = studentName;
-            resultClassSubject.textContent = `Kelas: ${studentClass} | Mata Pelajaran: ${settings.examSubject || 'Ujian'}`;
-            const totalScore = studentAnswers.reduce((sum, ans) => sum + ans.score, 0);
-            const averageScore = studentAnswers.length > 0 ? Math.round(totalScore / studentAnswers.length) : 0;
-            totalScoreEl.textContent = averageScore;
-            resultsDetails.innerHTML = '';
-            studentAnswers.forEach((ans, index) => {
-                const scoreColor = ans.score >= 75 ? 'bg-green-100 border-green-500' : ans.score >= 50 ? 'bg-yellow-100 border-yellow-500' : 'bg-red-100 border-red-500';
-                resultsDetails.innerHTML += `
-                    <div class="p-4 rounded-lg border-l-4 prose-custom ${scoreColor}">
-                        <h3 class="font-semibold text-gray-800">Soal ${index + 1}</h3>
-                        <p class="text-gray-700">${ans.question}</p>
-                        <p class="mt-2 p-2 bg-gray-50 rounded text-gray-600"><strong>Jawaban Anda:</strong> ${ans.answer}</p>
-                        <div class="mt-2 pt-2 border-t">
-                            <p class="font-bold">Skor: <span class="text-blue-700">${ans.score}</span> | Umpan Balik AI:</p>
-                            <p class="text-sm italic text-gray-800">${ans.feedback}</p>
-                        </div>
-                    </div>`;
-            });
-            saveResultsToSheet(averageScore);
-        };
-        
-        const downloadResultsAsPDF = async () => {
-            const { jsPDF } = window.jspdf;
-            const pdfRenderArea = document.getElementById('pdf-render-area');
-            const resultsClone = document.getElementById('results-screen').cloneNode(true);
-            
-            resultsClone.querySelector('#save-status').remove();
-            resultsClone.querySelector('.grid').remove();
-            resultsClone.querySelector('#results-details').style.maxHeight = 'none';
-            resultsClone.querySelector('#results-details').style.overflowY = 'visible';
-            
-            const signatureDiv = document.createElement('div');
-            signatureDiv.style.marginTop = '40px';
-            signatureDiv.style.textAlign = 'right';
-            signatureDiv.style.fontSize = '12px';
-            signatureDiv.style.width = '100%';
-            signatureDiv.innerHTML = `
-                <div style="float: right; width: 200px;">
-                    <p>Lumajang, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                    <p>Mengetahui,</p>
-                    <p>Guru Mata Pelajaran</p>
-                    <br><br><br>
-                    <p style="font-weight: bold; border-top: 1px solid black; padding-top: 5px;">${settings.teacherName || '(.........................................)'}</p>
-                </div>
-            `;
-            resultsClone.appendChild(signatureDiv);
-
-            pdfRenderArea.innerHTML = '';
-            pdfRenderArea.appendChild(resultsClone);
-
-            downloadPdfBtn.disabled = true;
-            downloadPdfBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mempersiapkan PDF...`;
-            
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            html2canvas(pdfRenderArea, { scale: 2, useCORS: true }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                let heightLeft = pdfHeight;
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pdf.internal.pageSize.getHeight();
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - pdfHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                    heightLeft -= pdf.internal.pageSize.getHeight();
-                }
-                
-                pdf.save(`Hasil Ujian - ${studentName}.pdf`);
-                pdfRenderArea.innerHTML = '';
-
-                downloadPdfBtn.disabled = false;
-                downloadPdfBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Unduh Hasil (PDF)`;
-            });
-        };
-
-        const retakeQuiz = () => {
-            resultsScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-        };
-        
-        const insertAtCursor = (textarea, textToInsert) => {
-            const startPos = textarea.selectionStart;
-            const endPos = textarea.selectionEnd;
-            const text = textarea.value;
-            textarea.value = text.substring(0, startPos) + textToInsert + text.substring(endPos, text.length);
-            textarea.focus();
-            textarea.selectionStart = startPos + textToInsert.length;
-            textarea.selectionEnd = startPos + textToInsert.length;
-        };
-
-        // --- FUNGSI GENERATOR SOAL ---
-        const showGeneratorStatus = (message, type = 'info') => {
-            generatorStatus.innerHTML = message;
-            if (type === 'error') {
-                generatorStatus.className = 'mt-4 text-center text-sm text-red-600 p-2 bg-red-50 rounded';
-            } else if (type === 'success') {
-                generatorStatus.className = 'mt-4 text-center text-sm text-green-600 p-2 bg-green-50 rounded';
-            } else if (type === 'loading') {
-                generatorStatus.innerHTML = `<div class="flex justify-center items-center"><div class="loader mr-2"></div><p>${message}</p></div>`;
-                generatorStatus.className = 'mt-4 text-center text-sm text-blue-600';
-            } else {
-                generatorStatus.className = 'mt-4 text-center text-sm text-gray-600';
-            }
-        };
-
-        const generateQuestions = async () => {
-            const prompt = aiPromptInput.value.trim();
-            const apiKey = settings.geminiApiKey;
-            const appsScriptUrl = settings.appsScriptUrl;
-
-            if (!prompt) {
-                showGeneratorStatus('Prompt tidak boleh kosong.', 'error');
-                return;
-            }
-            if (!apiKey || !appsScriptUrl) {
-                showGeneratorStatus('Pastikan Gemini API Key dan URL Apps Script sudah diisi di tab Konfigurasi.', 'error');
-                return;
-            }
-
-            generateQuestionsBtn.disabled = true;
-            showGeneratorStatus('AI sedang membuat soal...', 'loading');
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const systemPrompt = `Anda adalah asisten pembuat soal. Buat daftar soal dan kunci jawaban berdasarkan permintaan pengguna. Berikan jawaban HANYA dalam format JSON berupa array dari objek, di mana setiap objek memiliki properti "soal" dan "kunci_jawaban".`;
-            const userQuery = prompt;
-            
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                soal: { type: "STRING" },
-                                kunci_jawaban: { type: "STRING" }
-                            },
-                            required: ["soal", "kunci_jawaban"]
-                        }
-                    }
-                }
-            };
-
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
-                
-                const result = await response.json();
-                const generatedQuestions = JSON.parse(result.candidates[0].content.parts[0].text);
-                
-                if (!generatedQuestions || generatedQuestions.length === 0) {
-                    throw new Error('AI tidak mengembalikan soal.');
-                }
-
-                showGeneratorStatus(`Berhasil membuat ${generatedQuestions.length} soal. Mengirim ke Google Sheet...`, 'loading');
-                
-                let successCount = 0;
-                for (const q of generatedQuestions) {
-                    const saved = await saveQuestionToSheet(q.soal, q.kunci_jawaban);
-                    if (saved) successCount++;
-                }
-
-                showGeneratorStatus(`${successCount} dari ${generatedQuestions.length} soal berhasil disimpan ke Google Sheet!`, 'success');
-                aiPromptInput.value = '';
-
-            } catch (error) {
-                console.error("Error saat membuat soal:", error);
-                showGeneratorStatus(`Terjadi kesalahan: ${error.message}`, 'error');
-            } finally {
-                generateQuestionsBtn.disabled = false;
-            }
-        };
-
-        const saveQuestionToSheet = async (question, answer) => {
-			const payload = {
-				action: "addQuestion",
-				mapel: configExamSubjectInput.value || settings.examSubject || "Tidak ditentukan",
-				materi: configExamMaterialInput.value || settings.examMaterial || "Tidak ditentukan",
-				jenis: "Esai",
-				question: question,
-				answer: answer
-			};
-			try {
-				await fetch(settings.appsScriptUrl, { 
-					method: 'POST', 
-					mode: 'no-cors',
-					redirect: 'follow',
-					headers: { 'Content-Type': 'text/plain' },
-					body: JSON.stringify(payload)
-				});
-				return true;
-			} catch (error) {
-				console.error('Gagal menyimpan soal ke Sheet:', error);
-				return true;
-			}
-		};
-
-        
-        // --- FUNGSI GENERATOR LINK ---
-        const createLink = () => {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const otherSheet = otherSheetUrlInput.value.trim();
-            const otherAppsScript = otherAppsScriptUrlInput.value.trim();
-            
-            if (!otherSheet || !otherAppsScript) {
-                alert('Harap isi kedua URL untuk guru lain.');
-                return;
-            }
-            
-            const params = new URLSearchParams();
-            params.append('sheet_url', otherSheet);
-            params.append('apps_script_url', otherAppsScript);
-            
-            generatedLinkInput.value = `${baseUrl}?${params.toString()}`;
-        };
-        
-        const copyLink = () => {
-            if (!generatedLinkInput.value) return;
-            try {
-                // Coba gunakan Clipboard API modern
-                navigator.clipboard.writeText(generatedLinkInput.value).then(() => {
-                    alert('Link berhasil disalin!');
-                }).catch(() => {
-                    // Fallback untuk 'execCommand'
-                    throw new Error('Clipboard API gagal');
-                });
-            } catch (err) {
-                // Fallback (seringkali diperlukan di iframe)
-                generatedLinkInput.select();
-                document.execCommand('copy');
-                alert('Link berhasil disalin! (mode fallback)');
-            }
-        };
-
-        // --- Event Listeners ---
-        startQuizBtn.addEventListener('click', startQuiz);
-        submitAnswerBtn.addEventListener('click', submitAnswer);
-        retakeQuizBtn.addEventListener('click', retakeQuiz);
-        downloadPdfBtn.addEventListener('click', downloadResultsAsPDF);
-        
-        // Pengaturan Guru
-        teacherSettingsBtn.addEventListener('click', openSettingsModal);
-        settingsBackdrop.addEventListener('click', closeSettingsModal);
-        closeSettingsBtn.addEventListener('click', closeSettingsModal);
-        submitPinBtn.addEventListener('click', checkPin);
-        saveSettingsBtn.addEventListener('click', saveSettings);
-
-        // Navigasi Tab
-        tabConfigBtn.addEventListener('click', () => switchTab('config'));
-        tabGeneratorBtn.addEventListener('click', () => switchTab('generator'));
-        tabLinkGenBtn.addEventListener('click', () => switchTab('link-gen'));
-        
-        // Generator Soal
-        generateQuestionsBtn.addEventListener('click', generateQuestions);
-        
-        // Generator Link
-        createLinkBtn.addEventListener('click', createLink);
-        copyLinkBtn.addEventListener('click', copyLink);
-
-        // Toolbar
-        writingToolbar.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON' && e.target.dataset.char) {
-                insertAtCursor(studentAnswerInput, e.target.dataset.char);
-            }
-        });
-
-        // Muat pengaturan saat aplikasi dimulai
-        loadSettings();
-    });
+    loadSubjectList();
+});
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
