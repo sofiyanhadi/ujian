@@ -318,15 +318,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuestionIndex = 0;
     let studentName = "", studentClass = "";
     let studentAnswers = [];
+    // --- PENGATURAN OTOMATIS (AMAN UNTUK PUBLIK) ---
     let settings = {
-        sheetUrl: 'https://docs.google.com/spreadsheets/d/1e4AoOjuYCadBBMbJS3sAJC9GcE8Zg0dLPto5HIq1wvU/edit',
-        geminiApiKey: '',
-        appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxXvilrQjPZpZVBPYlY0rBwI-PJO1_7T45Ia699K1np4Z1XaJijIyvIONK_11SULbOk/exec',
-        teacherName: '',
-        examSubject: '',
-        examMaterial: '',
-        examDuration: ''
+      // URL Google Sheet berisi daftar soal
+      sheetUrl: 'https://docs.google.com/spreadsheets/d/1e4AoOjuYCadBBMbJS3sAJC9GcE8Zg0dLPto5HIq1wvU/edit',
+
+      // URL Web App dari Google Apps Script (kode GS.txt kamu)
+      appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxxxxx/exec',
+
+      // API Key disimpan secara lokal (tidak tampil ke publik GitHub)
+      // Guru dapat memasukkan di mode guru hanya sekali, lalu disimpan otomatis di localStorage
+      geminiApiKey: localStorage.getItem('geminiApiKey') || '',
+
+      // Data identitas dan ujian default (boleh dikosongkan kalau mau diganti dinamis)
+      teacherName: 'Bapak Sofiyan Hadi, S.Pd.',
+      examSubject: '',
+      examMaterial: '',
+      examDuration: ''
     };
+    // --- AKHIR PENGATURAN OTOMATIS ---
 
     // --- Dynamic dropdowns (inserted without changing visual layout) ---
     const subjectDropdown = document.createElement('select');
@@ -1007,4 +1017,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
